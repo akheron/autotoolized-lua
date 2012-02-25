@@ -1,5 +1,5 @@
 AC_PREREQ(2.59)
-AC_INIT([Autotoolized Lua], [5.1.4], [], [autotolized-lua])
+AC_INIT([lua], [5.1.4], [])
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([src/lapi.c])
@@ -21,16 +21,17 @@ LUA_LIBS="-lm"
 # Check for readline
 READLINE_DEFS="#undef LUA_USE_READLINE"
 if test "x$use_readline" == "xyes"; then
-  AC_CHECK_LIB([readline], [readline], [], [use_readline=no], [-lncurses])
+  AC_CHECK_LIB([readline], [readline], [use_readline=yes], [use_readline=no], [])
   AC_CHECK_HEADERS([readline/readline.h readline/history.h], [], [use_readline=no])
   if test "x$use_readline" == "xno"; then
     AC_MSG_WARN([readline headers could not be found, disabling readline support])
   else
     READLINE_DEFS="#define LUA_USE_READLINE"
-    LUA_LIBS="$LUA_LIBS -lreadline -lncurses"
+    READLINE_LIBS="$READLINE_LIBS -lreadline"
   fi
 fi
 AC_SUBST(READLINE_DEFS)
+AC_SUBST(READLINE_LIBS)
 
 case "$host" in
   *-mingw*)  use_os=win32  ;;
