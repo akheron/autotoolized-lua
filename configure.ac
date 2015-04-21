@@ -1,6 +1,14 @@
 AC_PREREQ(2.59)
 AC_INIT([Autotoolized Lua], [5.1.5], [], [autotoolized-lua])
 
+# keep this separate from PACKAGE_VERSION, as that tracks
+# the autotooled version, not the actual Lua version
+AC_SUBST([LUA_VERSION],[5.1.5])
+AC_SUBST([LUA_MAJOR_VERSION],
+	[`AS_ECHO_N([$LUA_VERSION]) | [sed 's/[.][0-9]*$//']` ]
+)
+
+
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([src/lapi.c])
 
@@ -59,11 +67,37 @@ AC_SUBST(LUA_BUILD_AS_DLL_DEFS)
 
 AC_SUBST(LUA_LIBS)
 
+VERSIONED_FILES=0
+AC_ARG_ENABLE(
+	[versioned-filenames],
+	[AS_HELP_STRING([--enable-versioned-filenames],
+	                [insert version (${LUA_MAJOR_VERSION}) into file and directory names [default=no]]
+			)
+	],
+	[
+	  AS_IF([test "$enableval" = yes],[VERSIONED_FILES=1] )
+	]
+)
+AM_CONDITIONAL([VERSIONED_FILES], [test $VERSIONED_FILES = 1])
+
+AM_COND_IF([VERSIONED_FILES],
+	[LUA_PC=lua${LUA_MAJOR_VERSION}.pc
+	 LUA_LIBNAME=lua${LUA_MAJOR_VERSION}
+	 includedir="$includedir/lua${LUA_MAJOR_VERSION}"
+	 ],
+	[LUA_PC=lua.pc
+	 LUA_LIBNAME=lua
+	]
+)
+
+AC_SUBST([LUA_PC])
+AC_SUBST([LUA_LIBNAME])
+
 AC_CONFIG_FILES([Makefile
                  src/Makefile
                  src/luaconf.h.template
                  etc/Makefile
-                 etc/lua.pc
+                 etc/lua.pc.template
                  doc/Makefile
 		 test/Makefile])
 AC_OUTPUT
